@@ -13,6 +13,21 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "report"
 OUTPUT_PATH = OUTPUT_DIR / "Network_Programming_Midterm_Report.docx"
 SCREENSHOT_DIR = ROOT / "evidence" / "screenshots"
+SOURCE_FILES = [
+    Path("CMakeLists.txt"),
+    Path("include/game.h"),
+    Path("include/log.h"),
+    Path("include/network_io.h"),
+    Path("include/protocol.h"),
+    Path("include/server_session.h"),
+    Path("src/client/main.c"),
+    Path("src/common/game.c"),
+    Path("src/common/log.c"),
+    Path("src/common/network_io.c"),
+    Path("src/common/protocol.c"),
+    Path("src/server/main.c"),
+    Path("src/server/session.c"),
+]
 
 BODY_FONT = "Microsoft JhengHei"
 CODE_FONT = "Consolas"
@@ -166,6 +181,25 @@ def add_code(document, code):
         run = paragraph.add_run(line if line else " ")
         set_run_font(run, name=CODE_FONT, size=8.2)
     document.add_paragraph().paragraph_format.space_after = Pt(0)
+
+
+def add_source_listing(document, relative_path):
+    add_heading(document, relative_path.as_posix(), 2)
+    source_path = ROOT / relative_path
+    lines = source_path.read_text(encoding="utf-8").expandtabs(4).splitlines()
+    numbered = "\n".join(f"{number:04d}  {line}" for number, line in enumerate(lines, 1))
+
+    paragraph = document.add_paragraph()
+    paragraph.paragraph_format.space_after = Pt(8)
+    paragraph.paragraph_format.line_spacing = 0.82
+    paragraph.paragraph_format.keep_together = False
+    paragraph.paragraph_format.widow_control = False
+    properties = paragraph._p.get_or_add_pPr()
+    shading = OxmlElement("w:shd")
+    shading.set(qn("w:fill"), PALE_GRAY)
+    properties.append(shading)
+    run = paragraph.add_run(numbered)
+    set_run_font(run, name=CODE_FONT, size=6.2)
 
 
 def add_picture(document, filename, caption, alt_text, width=6.55):
@@ -620,6 +654,16 @@ cd build
         "Protocol framing、absolute deadline、payload 上限、SIGPIPE 防護、child 回收與 session 上限處理主要異常條件。"
         "自動測試、執行畫面與 pcap 彼此對應，可重現本報告中的結果。",
     )
+
+    document.add_page_break()
+    add_heading(document, "附錄 A 完整程式原始碼", 1)
+    add_body(
+        document,
+        "本附錄逐行收錄可建置 server、client 與 libgame_common.so 的全部 CMake、header 與 C 原始碼。"
+        "自動測試、執行腳本、封包與原始截圖則以原始檔形式隨專案一併提交，以維持可直接執行與重現。",
+    )
+    for relative_path in SOURCE_FILES:
+        add_source_listing(document, relative_path)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     document.save(OUTPUT_PATH)
