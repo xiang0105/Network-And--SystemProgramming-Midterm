@@ -15,7 +15,8 @@
 ## 測試模式
 
 - 開發與至少 10-client concurrency 證明使用 `127.0.0.1:9734`，並以 `tcpdump` 擷取 loopback traffic。
-- 完成本機測試後，server 可改為綁定 `0.0.0.0:9734` 或指定 LAN address；另一台主機的 client 以 server 的實際 IPv4 address 連線。
+- 完成本機測試後，兩台主機固定連接同一個私人 Wi-Fi／LAN，例如讓學校電腦連接使用者提供的個人熱點；不使用學校 Wi-Fi，也不跨 public Internet。
+- Server 可改為綁定 `0.0.0.0:9734` 或指定 LAN address，另一台主機的 client 以 server 的實際 IPv4 address 連線；loopback 測試仍保留為正式必交證據。
 - 跨主機測試使用 Wireshark 擷取實體網路介面流量，並只在測試期間允許 server firewall 接受 TCP 9734。
 
 ## 已確認玩法
