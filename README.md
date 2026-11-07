@@ -12,7 +12,7 @@
 - 專案路徑：`/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`
 - 已驗證工具：GCC 13.3、GNU Make 4.3、CMake 3.28.3、Git 2.43、GDB、`ldd`、`nc`、tcpdump 4.99.4、valgrind 3.22、socat 1.8
 - 目前 WSL 網路模式為 NAT；本機開發與 loopback 測試先沿用 NAT，跨主機測試前再設定 mirrored networking 或等效的安全轉送方式。
-- 舊的 `Ubuntu-22.04` registration 已依使用者確認移除；遷移備份仍保留在 WSL 專案外作為 rollback。必須等 `Ubuntu-24.04` 完成第一次完整建置與測試且全部通過後，才可刪除備份。
+- 舊的 `Ubuntu-22.04` registration 已依使用者確認移除；`Ubuntu-24.04` 的完整建置、CTest 與整合測試均通過後，遷移備份亦已依使用者先前指示刪除。
 
 ## 建置系統
 
@@ -153,7 +153,7 @@ Server 必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接�
 - [x] 設計並實作異常情況的強健性機制
 - [x] 至少三組「未實作／已實作強健性機制」的執行差異範例
 - [x] 使用 CMake 建置，並可透過 CTest 執行自動測試
-- [ ] 報告包含系統設計、關鍵原始碼、執行截圖與完整原始碼
+- [x] 報告包含系統設計、關鍵原始碼、執行截圖與完整原始碼
 - [ ] 製作約 2 分鐘的操作展示影片
 
 ## 目前狀態
@@ -162,4 +162,4 @@ Server 必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接�
 
 目前共有六組 CTest，涵蓋遊戲規則、protocol header、deadline-aware I/O、完整 frame、server session state machine，以及三組 robustness 改善前後對照。另有 `tests/test_loopback_concurrency.sh` 可重現 10 個 child processes 時間重疊的證明，`tests/test_debug_logging.sh` 可重現執行期 log level 差異；Debug clean build、CTest、Valgrind、動態連結、10-client loopback 與 debug log 測試均已通過。
 
-Loopback `tcpdump` 封包與逐段分析已保存於 `evidence/packet-capture/`；三組 robustness 改善前後對照已保存於 `docs/testing/2026-11-08-robustness-comparison.md`。核心程式及必交執行證據已完成，尚待整理正式報告、截圖與約 2 分鐘影片。
+Loopback `tcpdump` 封包與逐段分析已保存於 `evidence/packet-capture/`；三組 robustness 改善前後對照已保存於 `docs/testing/2026-11-08-robustness-comparison.md`。正式報告與五張執行截圖已完成，報告內已附約 2 分鐘影片的逐段腳本；目前只剩實際錄製影片。
