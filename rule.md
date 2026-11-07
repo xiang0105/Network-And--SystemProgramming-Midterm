@@ -72,4 +72,6 @@
 14. 第 15 次有效猜測仍未猜中時，server 必須在失敗回應中公開該局正確答案，然後將該局標記為結束。
 15. 第一版不實作跨玩家或跨 connections 的全域排行榜，也不使用共享記憶體或共用檔案保存成績。
 16. 每個 child process 僅在記憶體中保存該 connection 期間的完成局數、勝利數、失敗數與最佳猜測次數；connection 關閉後不持久保存。
-17. 連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。
+17. 一般操作必須能直接執行 `./server` 與 `./client`；預設 server endpoint 為 `127.0.0.1:9734`，並保留可選的 host／port 參數供跨主機或 port 衝突時覆寫。
+18. 單一 server listening port 必須支援多條同時存在的 TCP connections；不得把 port 誤當成單一 connection。每條 connection 由來源 IP、來源 port、目的 IP 與目的 port 的組合區分。
+19. 連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。

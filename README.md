@@ -6,6 +6,8 @@
 
 ## 連線模型
 
+- 一般操作直接執行 `./server` 與 `./client`；預設使用 `127.0.0.1:9734`，並保留可選參數供跨主機或 port 衝突時覆寫。
+- Port `9734` 是 server 的共同 listening endpoint，不是一條 connection；多個 clients 可同時連到同一 port，TCP 會以來源／目的 IP 與 port 的組合區分各 connection。
 - 每次 `accept()` 成功後都建立一個 child process；同一 IP 建立多條 TCP connections 時，也必須建立多個 child processes。
 - 同一條 connection 可連續遊玩多局；每局結束後可開始新局或離開。
 - Client 僅以該條 TCP connection 識別；來源 IP 與 port 只用於 log 與執行證據，不作為玩家身分或共用 child 的依據。
