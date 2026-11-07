@@ -12,7 +12,7 @@
 - 專案路徑：`/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`
 - 已驗證工具：GCC 13.3、GNU Make 4.3、CMake 3.28.3、Git 2.43、GDB、`ldd`、`nc`、tcpdump 4.99.4、valgrind 3.22、socat 1.8
 - 目前 WSL 網路模式為 NAT；本機開發與 loopback 測試先沿用 NAT，跨主機測試前再設定 mirrored networking 或等效的安全轉送方式。
-- 舊的 `Ubuntu-22.04` registration 已依使用者確認移除；遷移備份仍保留在 WSL 專案外作為 rollback，未取得另一次明確確認前不得刪除。
+- 舊的 `Ubuntu-22.04` registration 已依使用者確認移除；遷移備份仍保留在 WSL 專案外作為 rollback。必須等 `Ubuntu-24.04` 完成第一次完整建置與測試且全部通過後，才可刪除備份。
 
 ## 建置系統
 
