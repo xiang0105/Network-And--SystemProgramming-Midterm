@@ -1,0 +1,33 @@
+# Build output
+build/
+bin/
+obj/
+*.o
+*.a
+*.so
+*.d
+
+# Executables and debug artifacts
+client
+server
+*_client
+*_server
+*.out
+core
+core.*
+*.log
+
+# CMake-generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
