@@ -55,7 +55,24 @@
 - 每個 payload 最多 4096 bytes；接收端必須在讀取或配置 payload buffer 前拒絕超過上限的 header。
 - 猜測訊息的 payload 固定為恰好 4 bytes 數字字元，例如 `0123`，不包含字串終止字元。
 - System information、connection 戰績與錯誤訊息使用 UTF-8 文字；header 的 payload length 不包含本機 C 字串使用的 `\0`。
-- 訊息種類仍待後續確認。
+
+Message type 使用以下固定值；Client 不得傳送 Server response type，Server 也不得傳送 Client request type：
+
+| 數值 | 方向 | Message type |
+| ---: | --- | --- |
+| `0x01` | Client → Server | `START_GAME` |
+| `0x02` | Client → Server | `GUESS` |
+| `0x03` | Client → Server | `GET_SYSTEM_INFO` |
+| `0x04` | Client → Server | `GET_STATS` |
+| `0x05` | Client → Server | `QUIT` |
+| `0x81` | Server → Client | `WELCOME` |
+| `0x82` | Server → Client | `GAME_STARTED` |
+| `0x83` | Server → Client | `GUESS_RESULT` |
+| `0x84` | Server → Client | `GAME_WON` |
+| `0x85` | Server → Client | `GAME_LOST` |
+| `0x86` | Server → Client | `SYSTEM_INFO` |
+| `0x87` | Server → Client | `STATS` |
+| `0xFF` | Server → Client | `ERROR` |
 
 ## Server System Information
 
