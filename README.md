@@ -52,7 +52,10 @@
 
 - Header 必須逐欄位編碼與解碼，不得直接將 C `struct` 的記憶體內容送上網路，以避免 padding、alignment 與大小端差異。
 - 收送函式必須處理 partial read／write 與 `EINTR`，並在配置或讀取 payload 前檢查協定版本及長度上限。
-- 訊息種類、payload 格式與最大 payload 長度仍待後續確認。
+- 每個 payload 最多 4096 bytes；接收端必須在讀取或配置 payload buffer 前拒絕超過上限的 header。
+- 猜測訊息的 payload 固定為恰好 4 bytes 數字字元，例如 `0123`，不包含字串終止字元。
+- System information、connection 戰績與錯誤訊息使用 UTF-8 文字；header 的 payload length 不包含本機 C 字串使用的 `\0`。
+- 訊息種類仍待後續確認。
 
 ## Server System Information
 
