@@ -83,4 +83,6 @@
 25. 已驗證 GCC、Make、CMake、Git、GDB、`ldd`、`nc`、tcpdump、valgrind 與 socat 可用。
 26. 舊的 `Ubuntu-22.04` registration 已依使用者明確同意移除；遷移備份必須保留到 `Ubuntu-24.04` 完成第一次完整建置、CTest、自動測試與必要整合測試且全部通過。只有保存測試結果後，才可依使用者指示刪除備份。
 27. 正式建置系統採用 CMake，不另外維護手寫 Makefile。必須採用 out-of-source build；targets 至少包含 `game_common` 動態共用函式庫、`server`、`client` 與自動測試，並支援 Debug／Release 組態及 CTest。
-28. 第二台主機的 Windows／WSL 版本、連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。
+28. 每個 application message 採用固定 12-byte header：bytes 0–3 為 ASCII magic `ABGM`、byte 4 為 protocol version、byte 5 為 message type、bytes 6–7 為 reserved、bytes 8–11 為 payload length。第一版 version 固定為 `1`、reserved 傳送時固定為 `0`，payload length 使用 network byte order。
+29. Protocol header 必須逐欄位編碼與解碼，不得直接傳送 C `struct` 的記憶體內容。接收端在配置或讀取 payload 前，必須驗證 magic、version、reserved 與 payload length 上限，並以完整讀寫函式處理 partial read／write 及 `EINTR`。
+30. 第二台主機的 Windows／WSL 版本、message types、payload 格式與長度上限、連續無效請求的防濫用上限及額外功能仍在需求訪談中；未確認的項目不得自行視為已定案。

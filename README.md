@@ -36,6 +36,22 @@
 - 同一條 connection 可連續遊玩多局；每局結束後可開始新局或離開。
 - Client 僅以該條 TCP connection 識別；來源 IP 與 port 只用於 log 與執行證據，不作為玩家身分或共用 child 的依據。
 
+## 通訊協定 Header
+
+每個 application message 都由固定 12-byte header 與其後的 payload 組成：
+
+| Offset | 長度 | 欄位 | 說明 |
+| --- | ---: | --- | --- |
+| 0 | 4 bytes | Magic | 固定 ASCII `ABGM` |
+| 4 | 1 byte | Version | 第一版固定為 `1` |
+| 5 | 1 byte | Type | 訊息種類 |
+| 6 | 2 bytes | Reserved | 第一版傳送時必須為 `0` |
+| 8 | 4 bytes | Payload length | Payload byte 數，使用 network byte order |
+
+- Header 必須逐欄位編碼與解碼，不得直接將 C `struct` 的記憶體內容送上網路，以避免 padding、alignment 與大小端差異。
+- 收送函式必須處理 partial read／write 與 `EINTR`，並在配置或讀取 payload 前檢查協定版本及長度上限。
+- 訊息種類、payload 格式與最大 payload 長度仍待後續確認。
+
 ## 測試模式
 
 - 開發與至少 10-client concurrency 證明使用 `127.0.0.1:9734`，並以 `tcpdump` 擷取 loopback traffic。
