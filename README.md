@@ -4,6 +4,12 @@
 
 目前確定採用獨立單人模式：每個 client 各自連線並挑戰由 server 產生的答案；server 對每個 connection 使用獨立的 child process 保存該局狀態並處理猜測。
 
+## 連線模型
+
+- 每次 `accept()` 成功後都建立一個 child process；同一 IP 建立多條 TCP connections 時，也必須建立多個 child processes。
+- 同一條 connection 可連續遊玩多局；每局結束後可開始新局或離開。
+- Client 僅以該條 TCP connection 識別；來源 IP 與 port 只用於 log 與執行證據，不作為玩家身分或共用 child 的依據。
+
 ## 已確認玩法
 
 - 每局答案固定為 4 位數。
