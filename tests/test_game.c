@@ -5,6 +5,17 @@
 int main(void)
 {
     game_score_t score = {0U, 0U};
+    char generated[5] = {0};
+    size_t generation;
+
+    for (generation = 0U; generation < 100U; ++generation) {
+        if (!game_generate_code(generated)
+            || !game_code_is_valid(generated, 4U)
+            || generated[4] != '\0') {
+            fprintf(stderr, "expected generated codes to follow game rules\n");
+            return 1;
+        }
+    }
 
     if (!game_code_is_valid("0123", 4U)) {
         fprintf(stderr, "expected a four-digit code with a leading zero to be valid\n");

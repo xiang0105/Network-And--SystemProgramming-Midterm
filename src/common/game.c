@@ -1,5 +1,8 @@
 #include "game.h"
 
+#include <errno.h>
+#include <sys/random.h>
+
 bool game_code_is_valid(const char *code, size_t length)
 {
     size_t index;
@@ -21,6 +24,49 @@ bool game_code_is_valid(const char *code, size_t length)
         }
     }
 
+    return true;
+}
+
+bool game_generate_code(char output[5])
+{
+    size_t index;
+
+    if (output == NULL) {
+        return false;
+    }
+
+    for (index = 0U; index < 4U; ++index) {
+        for (;;) {
+            unsigned char random_byte;
+            char digit;
+            size_t previous;
+            bool duplicate = false;
+            ssize_t received;
+
+            do {
+                received = getrandom(&random_byte, sizeof(random_byte), 0U);
+            } while (received < 0 && errno == EINTR);
+
+            if (received != (ssize_t)sizeof(random_byte)) {
+                return false;
+            }
+
+            digit = (char)('0' + (random_byte % 10U));
+            for (previous = 0U; previous < index; ++previous) {
+                if (output[previous] == digit) {
+                    duplicate = true;
+                    break;
+                }
+            }
+
+            if (!duplicate) {
+                output[index] = digit;
+                break;
+            }
+        }
+    }
+
+    output[4] = '\0';
     return true;
 }
 

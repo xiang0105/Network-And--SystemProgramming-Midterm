@@ -28,6 +28,30 @@
   ctest --test-dir build --output-on-failure
   ```
 
+- 建置完成後可直接從建置目錄啟動：
+
+  ```sh
+  cd build
+  ./server
+  # 另一個終端，同樣位於 build/
+  ./client
+  ```
+
+- Server 可覆寫監聽位置、port、逾時及執行期 log level，例如測試模式：
+
+  ```sh
+  ./server --host 127.0.0.1 --port 9734 \
+    --idle-timeout 10 --log-level debug
+  ```
+
+- 編譯期 debug log 由 CMake option 控制；正式關閉方式為：
+
+  ```sh
+  cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release \
+    -DENABLE_DEBUG_LOG=OFF
+  cmake --build build-release
+  ```
+
 ## 連線模型
 
 - 一般操作直接執行 `./server` 與 `./client`；預設使用 `127.0.0.1:9734`，並保留可選參數供跨主機或 port 衝突時覆寫。
@@ -120,22 +144,22 @@ Server 必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接�
 
 ## 作業要求檢核
 
-- [ ] Server 對每個 client connection 使用 `fork()` 建立 child process（不可使用 thread）
-- [ ] 至少同時處理 10 個 clients，並提供執行期證明
+- [x] Server 對每個 client connection 使用 `fork()` 建立 child process（不可使用 thread）
+- [x] 至少同時處理 10 個 clients，並提供可重跑的執行期證明
 - [ ] 以 `tcpdump`（loopback）或 Wireshark（跨主機）擷取並分析封包
-- [ ] 提供編譯期與執行期兩層 debug log 控制
-- [ ] Client 與 server 共用 utility functions 必須封裝成動態共用函式庫 `.so`
-- [ ] Client 可向 server 請求 system information
-- [ ] 設計並實作異常情況的強健性機制
+- [x] 提供編譯期與執行期兩層 debug log 控制
+- [x] Client 與 server 共用 utility functions 必須封裝成動態共用函式庫 `.so`
+- [x] Client 可向 server 請求 system information
+- [x] 設計並實作異常情況的強健性機制
 - [ ] 至少三組「未實作／已實作強健性機制」的執行差異範例
-- [ ] 使用 CMake 建置，並可透過 CTest 執行自動測試
+- [x] 使用 CMake 建置，並可透過 CTest 執行自動測試
 - [ ] 報告包含系統設計、關鍵原始碼、執行截圖與完整原始碼
 - [ ] 製作約 2 分鐘的操作展示影片
 
 ## 目前狀態
 
-已完成課程教材與老師範例程式盤點，並確定主題、遊戲模式、基本數字規則及回合猜測上限。
+核心程式已完成：`server` 對每條 accepted connection 使用 `fork()`，child 獨立維護遊戲及連線戰績；`client` 提供遊戲、system information、戰績與離開選單。共用的遊戲、協定、完整網路 I/O 與 log 工具皆由 `libgame_common.so` 提供。
 
-前四個 CMake／CTest 程式切片已完成：`game_common` 動態共用函式庫目前提供四位遊戲代碼驗證、A/B 計分、12-byte protocol header codec、具 absolute deadline 的完整 socket read/write，以及完整 application frame send/receive。四組測試皆已通過 Debug、Release、動態連結及 Valgrind 驗證。
+目前共有五組 CTest，涵蓋遊戲規則、protocol header、deadline-aware I/O、完整 frame 與 server session state machine。另有 `tests/test_loopback_concurrency.sh` 可重現 10 個 child processes 時間重疊的證明，`tests/test_debug_logging.sh` 可重現執行期 log level 差異；Debug clean build、CTest、Valgrind、動態連結、10-client loopback 與 debug log 測試均已通過。
 
-`server`、`client` 與遊戲 state machine 整合測試尚未實作，因此目前的 10 條 loopback smoke test 不作為正式 concurrency 證據，WSL 遷移備份也繼續保留。
+尚待完成的是 loopback `tcpdump` 封包證據與分析，以及至少三組 robustness 改善前後對照紀錄。完成這些完整整合證據前，WSL 遷移備份繼續保留。

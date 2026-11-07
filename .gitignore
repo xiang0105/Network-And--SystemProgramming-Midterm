@@ -8,8 +8,8 @@ obj/
 *.d
 
 # Executables and debug artifacts
-client
-server
+/client
+/server
 *_client
 *_server
 *.out

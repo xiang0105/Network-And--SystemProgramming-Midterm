@@ -10,6 +10,7 @@ typedef struct {
 } game_score_t;
 
 bool game_code_is_valid(const char *code, size_t length);
+bool game_generate_code(char output[5]);
 bool game_score_calculate(
     const char *answer,
     size_t answer_length,
