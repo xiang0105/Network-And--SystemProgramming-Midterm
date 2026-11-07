@@ -41,8 +41,8 @@ ctest --test-dir /tmp/network-midterm-no-debug --output-on-failure
 ## Results
 
 - Debug clean build：PASS，無 compiler warning
-- Debug CTest：5/5 PASS
-- Release、`ENABLE_DEBUG_LOG=OFF` CTest：5/5 PASS
+- Debug CTest：6/6 PASS
+- Release、`ENABLE_DEBUG_LOG=OFF` CTest：6/6 PASS
 - Valgrind `session_tests`：PASS，無 memory error
 - `server` 與 `client` 均由 `ldd` 證實載入 `build/libgame_common.so`
 - Client system-information／stats smoke test：PASS
@@ -51,4 +51,4 @@ ctest --test-dir /tmp/network-midterm-no-debug --output-on-failure
 
 ## Remaining evidence
 
-功能本身已完成；正式交付證據仍需補上 `tcpdump` loopback `.pcap` 與 frame 分析，以及三組 robustness「改善前／改善後」的相同輸入對照。WSL 遷移備份在這些完整整合證據完成前繼續保留。
+後續已補上 `tcpdump` loopback `.pcap`、frame 分析，以及三組 robustness「改善前／改善後」的相同輸入對照；分別保存於 `evidence/packet-capture/` 與 `docs/testing/2026-11-08-robustness-comparison.md`。

@@ -77,20 +77,35 @@ if(BUILD_TESTING)
         tests/test_session.c
     )
 
+    add_executable(robustness_demo
+        examples/robustness_demo.c
+    )
+
     target_link_libraries(game_common_tests PRIVATE game_common)
     target_link_libraries(protocol_tests PRIVATE game_common)
     target_link_libraries(network_io_tests PRIVATE game_common)
     target_link_libraries(frame_tests PRIVATE game_common)
     target_link_libraries(session_tests PRIVATE server_core)
+    target_link_libraries(robustness_demo PRIVATE game_common)
     target_compile_options(game_common_tests PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(protocol_tests PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(network_io_tests PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(frame_tests PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(session_tests PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(robustness_demo PRIVATE -Wall -Wextra -Wpedantic)
+
+    find_program(BASH_EXECUTABLE bash REQUIRED)
 
     add_test(NAME game_common_tests COMMAND game_common_tests)
     add_test(NAME protocol_tests COMMAND protocol_tests)
     add_test(NAME network_io_tests COMMAND network_io_tests)
     add_test(NAME frame_tests COMMAND frame_tests)
     add_test(NAME session_tests COMMAND session_tests)
+    add_test(
+        NAME robustness_comparison
+        COMMAND
+            ${BASH_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_robustness_demo.sh
+            $<TARGET_FILE:robustness_demo>
+    )
 endif()
