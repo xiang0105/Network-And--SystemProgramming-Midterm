@@ -20,6 +20,12 @@
 - 非法輸入會收到明確錯誤訊息，但不消耗 15 次有效猜測額度。
 - 第 15 次有效猜測仍未猜中時，server 會在失敗回應中公開該局正確答案。
 
+## 成績範圍
+
+- 第一版不提供跨玩家或跨 connections 的全域排行榜。
+- Child process 僅保存目前 connection 期間的完成局數、勝利數、失敗數與最佳猜測次數。
+- Connection 關閉、child process 結束後，該次連線的成績不持久保存。
+
 ## 作業要求檢核
 
 - [ ] Server 對每個 client connection 使用 `fork()` 建立 child process（不可使用 thread）
