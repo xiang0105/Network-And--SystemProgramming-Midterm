@@ -4,6 +4,16 @@
 
 目前確定採用獨立單人模式：每個 client 各自連線並挑戰由 server 產生的答案；server 對每個 connection 使用獨立的 child process 保存該局狀態並處理猜測。
 
+## 基準開發環境
+
+- Windows Subsystem for Linux 2（WSL 2.6.3）
+- WSL distribution 名稱：`Ubuntu-22.04`；實際系統：Ubuntu 24.04.5 LTS、x86_64
+- Linux kernel：`6.6.87.2-microsoft-standard-WSL2`
+- 專案路徑：`/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`
+- 已驗證工具：GCC 13.3、GNU Make 4.3、CMake 3.28.3、Git 2.43、GDB、`ldd`、`nc`、tcpdump 4.99.4
+- 目前 WSL 網路模式為 NAT；本機開發與 loopback 測試先沿用 NAT，跨主機測試前再設定 mirrored networking 或等效的安全轉送方式。
+- `valgrind` 與 `socat` 尚未安裝，屬後續測試用選配工具，不阻擋專案開發。
+
 ## 連線模型
 
 - 一般操作直接執行 `./server` 與 `./client`；預設使用 `127.0.0.1:9734`，並保留可選參數供跨主機或 port 衝突時覆寫。
