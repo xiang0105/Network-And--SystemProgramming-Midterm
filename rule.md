@@ -74,4 +74,6 @@
 16. 每個 child process 僅在記憶體中保存該 connection 期間的完成局數、勝利數、失敗數與最佳猜測次數；connection 關閉後不持久保存。
 17. 一般操作必須能直接執行 `./server` 與 `./client`；預設 server endpoint 為 `127.0.0.1:9734`，並保留可選的 host／port 參數供跨主機或 port 衝突時覆寫。
 18. 單一 server listening port 必須支援多條同時存在的 TCP connections；不得把 port 誤當成單一 connection。每條 connection 由來源 IP、來源 port、目的 IP 與目的 port 的組合區分。
-19. 連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。
+19. 開發與至少 10-client concurrency 證明使用 `127.0.0.1:9734`；完成 loopback 測試後，必須能讓 server 綁定 `0.0.0.0:9734` 或指定 LAN address，讓另一台主機的 client 以 server 實際 IPv4 address 連線。
+20. Loopback 封包證據使用 `tcpdump`；跨主機證據使用 Wireshark 擷取實體網路介面。若需調整 firewall，只允許測試所需的 TCP 9734，並避免不必要的對外網路暴露。
+21. 兩台主機是否限定同一個 LAN、連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。

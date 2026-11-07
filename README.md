@@ -12,6 +12,12 @@
 - 同一條 connection 可連續遊玩多局；每局結束後可開始新局或離開。
 - Client 僅以該條 TCP connection 識別；來源 IP 與 port 只用於 log 與執行證據，不作為玩家身分或共用 child 的依據。
 
+## 測試模式
+
+- 開發與至少 10-client concurrency 證明使用 `127.0.0.1:9734`，並以 `tcpdump` 擷取 loopback traffic。
+- 完成本機測試後，server 可改為綁定 `0.0.0.0:9734` 或指定 LAN address；另一台主機的 client 以 server 的實際 IPv4 address 連線。
+- 跨主機測試使用 Wireshark 擷取實體網路介面流量，並只在測試期間允許 server firewall 接受 TCP 9734。
+
 ## 已確認玩法
 
 - 每局答案固定為 4 位數。
