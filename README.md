@@ -85,6 +85,12 @@ Client 可透過主選單向 server 請求以下唯讀資訊：
 
 Server 必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接取得資料，不得透過 shell command 收集資訊。回應不得包含使用者名稱、私人路徑、IP address、環境變數或其他不必要的機器識別資訊。
 
+## Robustness Defaults
+
+- 每條 connection 的 idle／incomplete-frame timeout 預設為 120 秒；超時時 server child 傳送 `ERROR`（若 socket 狀態仍允許）後關閉 connection。
+- Timeout 使用完整 frame 的 deadline，不因只收到少量 bytes 而無限延長，以防止 slow client 長期占用 child process。
+- Server 提供 `--idle-timeout SECONDS` 覆寫值；正式執行維持 120 秒，timeout 測試與截圖固定使用 `--idle-timeout 10`。
+
 ## 測試模式
 
 - 開發與至少 10-client concurrency 證明使用 `127.0.0.1:9734`，並以 `tcpdump` 擷取 loopback traffic。

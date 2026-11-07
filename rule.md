@@ -85,10 +85,11 @@
 27. 正式建置系統採用 CMake，不另外維護手寫 Makefile。必須採用 out-of-source build；targets 至少包含 `game_common` 動態共用函式庫、`server`、`client` 與自動測試，並支援 Debug／Release 組態及 CTest。
 28. 每個 application message 採用固定 12-byte header：bytes 0–3 為 ASCII magic `ABGM`、byte 4 為 protocol version、byte 5 為 message type、bytes 6–7 為 reserved、bytes 8–11 為 payload length。第一版 version 固定為 `1`、reserved 傳送時固定為 `0`，payload length 使用 network byte order。
 29. Protocol header 必須逐欄位編碼與解碼，不得直接傳送 C `struct` 的記憶體內容。接收端在配置或讀取 payload 前，必須驗證 magic、version、reserved 與 payload length 上限，並以完整讀寫函式處理 partial read／write 及 `EINTR`。
-30. 第二台主機的 Windows／WSL 版本、連續無效請求的防濫用上限、timeout、connection／child 上限及額外功能仍在需求訪談中；未確認的項目不得自行視為已定案。
+30. 第二台主機的 Windows／WSL 版本、連續無效請求的防濫用上限、connection／child 上限及額外功能仍在需求訪談中；未確認的項目不得自行視為已定案。
 31. Client 連線成功後的主選單固定包含：開始新遊戲、查看 server system information、查看本次 connection 戰績、離開；每局結束後回到主選單。戰績選項只讀取規則 16 已定義的 child process 記憶體資料，不得擴張為帳號、持久化資料或跨 connection 排行榜。
 32. Server system information 固定包含 Linux／kernel 版本、CPU 架構與邏輯核心數、系統運行時間、總記憶體與可用記憶體。必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接取得，不得執行 shell command。
 33. System information response 不得包含使用者名稱、私人路徑、IP address、環境變數或其他非必要機器識別資訊；測試證據、封包與截圖也必須遵守相同限制。
 34. 每個 message payload 的硬性上限為 4096 bytes。接收端必須在讀取 payload 或依長度配置記憶體之前驗證此上限；超過上限的 frame 必須拒絕並安全結束或依後續錯誤策略處理。
 35. Guess payload 固定為恰好 4 bytes 的數字字元且不包含 `\0`。System information、connection 戰績與錯誤訊息 payload 使用 UTF-8 文字；header 的 payload length 不包含接收端為 C 字串額外加入的終止字元。
 36. Message type 固定如下：Client requests 為 `START_GAME=0x01`、`GUESS=0x02`、`GET_SYSTEM_INFO=0x03`、`GET_STATS=0x04`、`QUIT=0x05`；Server responses 為 `WELCOME=0x81`、`GAME_STARTED=0x82`、`GUESS_RESULT=0x83`、`GAME_WON=0x84`、`GAME_LOST=0x85`、`SYSTEM_INFO=0x86`、`STATS=0x87`、`ERROR=0xFF`。任一端收到方向不符或未定義的 type 時，必須視為 protocol error。
+37. 每條 connection 的 idle／incomplete-frame timeout 預設為 120 秒，並提供 server 參數 `--idle-timeout SECONDS` 覆寫。Timeout 必須以完整 frame 的 absolute deadline 實作，不可因只收到少量 bytes 而無限延長；正式執行使用 120 秒，測試與截圖固定使用 10 秒。超時後 child 應在 socket 狀態允許時回覆 `ERROR`，再關閉 connection 並正常結束。
