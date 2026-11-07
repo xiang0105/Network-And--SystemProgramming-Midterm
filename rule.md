@@ -86,3 +86,4 @@
 28. 每個 application message 採用固定 12-byte header：bytes 0–3 為 ASCII magic `ABGM`、byte 4 為 protocol version、byte 5 為 message type、bytes 6–7 為 reserved、bytes 8–11 為 payload length。第一版 version 固定為 `1`、reserved 傳送時固定為 `0`，payload length 使用 network byte order。
 29. Protocol header 必須逐欄位編碼與解碼，不得直接傳送 C `struct` 的記憶體內容。接收端在配置或讀取 payload 前，必須驗證 magic、version、reserved 與 payload length 上限，並以完整讀寫函式處理 partial read／write 及 `EINTR`。
 30. 第二台主機的 Windows／WSL 版本、message types、payload 格式與長度上限、連續無效請求的防濫用上限及額外功能仍在需求訪談中；未確認的項目不得自行視為已定案。
+31. Client 連線成功後的主選單固定包含：開始新遊戲、查看 server system information、查看本次 connection 戰績、離開；每局結束後回到主選單。戰績選項只讀取規則 16 已定義的 child process 記憶體資料，不得擴張為帳號、持久化資料或跨 connection 排行榜。

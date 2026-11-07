@@ -35,6 +35,8 @@
 - 每次 `accept()` 成功後都建立一個 child process；同一 IP 建立多條 TCP connections 時，也必須建立多個 child processes。
 - 同一條 connection 可連續遊玩多局；每局結束後可開始新局或離開。
 - Client 僅以該條 TCP connection 識別；來源 IP 與 port 只用於 log 與執行證據，不作為玩家身分或共用 child 的依據。
+- 連線成功後顯示主選單：開始新遊戲、查看 server system information、查看本次 connection 戰績、離開。每局結束後回到主選單。
+- 「本次 connection 戰績」只是目前 client 視窗的臨時計數，包含完成局數、勝利、失敗及最佳猜測次數；不建立帳號、不與其他玩家比較，關閉 connection 後清空。
 
 ## 通訊協定 Header
 
