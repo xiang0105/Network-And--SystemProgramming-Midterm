@@ -90,6 +90,8 @@ Server 必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接�
 - 每條 connection 的 idle／incomplete-frame timeout 預設為 120 秒；超時時 server child 傳送 `ERROR`（若 socket 狀態仍允許）後關閉 connection。
 - Timeout 使用完整 frame 的 deadline，不因只收到少量 bytes 而無限延長，以防止 slow client 長期占用 child process。
 - Server 提供 `--idle-timeout SECONDS` 覆寫值；正式執行維持 120 秒，timeout 測試與截圖固定使用 `--idle-timeout 10`。
+- Server 最多允許 32 個同時進行中的正常 client sessions。每個已接受的 connection 仍建立 child；若已達上限，該短期 child 只回覆 `ERROR: server busy` 後關閉，不建立遊戲狀態，也不計入 active sessions。
+- Parent 必須追蹤 active session children，透過 `SIGCHLD`／`waitpid()` 回收並遞減計數；若 `fork()` 失敗，必須關閉該 accepted socket、記錄錯誤並繼續服務既有 clients。
 
 ## 測試模式
 
