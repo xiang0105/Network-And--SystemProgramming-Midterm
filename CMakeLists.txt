@@ -8,6 +8,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 add_library(game_common SHARED
     src/common/game.c
+    src/common/protocol.c
 )
 
 target_include_directories(game_common
@@ -29,8 +30,15 @@ if(BUILD_TESTING)
         tests/test_game.c
     )
 
+    add_executable(protocol_tests
+        tests/test_protocol.c
+    )
+
     target_link_libraries(game_common_tests PRIVATE game_common)
+    target_link_libraries(protocol_tests PRIVATE game_common)
     target_compile_options(game_common_tests PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(protocol_tests PRIVATE -Wall -Wextra -Wpedantic)
 
     add_test(NAME game_common_tests COMMAND game_common_tests)
+    add_test(NAME protocol_tests COMMAND protocol_tests)
 endif()
