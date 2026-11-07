@@ -81,5 +81,6 @@
 23. 正式基準開發環境為本機 WSL2：預設 distribution 名稱 `Ubuntu-24.04`，實際系統 Ubuntu 24.04.5 LTS、x86_64，專案路徑 `/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`。建置、執行、測試與證據指令必須先在此環境驗證。
 24. 本機 WSL 目前使用 NAT；loopback 開發先沿用 NAT，跨主機測試前再採用 mirrored networking 或等效且最小開放範圍的安全轉送方式。不得讓 WSL 網路設定阻擋 loopback 必交證據。
 25. 已驗證 GCC、Make、CMake、Git、GDB、`ldd`、`nc`、tcpdump、valgrind 與 socat 可用。
-26. 舊的 `Ubuntu-22.04` registration 與遷移備份必須保留作為 rollback；只有在 `Ubuntu-24.04` 完成後續實作與測試，且使用者再次明確同意後，才可移除舊環境或備份。
-27. 第二台主機的 Windows／WSL 版本、連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。
+26. 舊的 `Ubuntu-22.04` registration 已依使用者明確同意移除；遷移備份仍保留，未取得使用者另一次明確同意前不得刪除。
+27. 正式建置系統採用 CMake，不另外維護手寫 Makefile。必須採用 out-of-source build；targets 至少包含 `game_common` 動態共用函式庫、`server`、`client` 與自動測試，並支援 Debug／Release 組態及 CTest。
+28. 第二台主機的 Windows／WSL 版本、連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。

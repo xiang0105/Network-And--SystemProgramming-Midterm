@@ -12,7 +12,21 @@
 - 專案路徑：`/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`
 - 已驗證工具：GCC 13.3、GNU Make 4.3、CMake 3.28.3、Git 2.43、GDB、`ldd`、`nc`、tcpdump 4.99.4、valgrind 3.22、socat 1.8
 - 目前 WSL 網路模式為 NAT；本機開發與 loopback 測試先沿用 NAT，跨主機測試前再設定 mirrored networking 或等效的安全轉送方式。
-- 舊的 `Ubuntu-22.04` registration 與遷移備份暫時保留作為 rollback；未取得使用者明確確認前不得移除。
+- 舊的 `Ubuntu-22.04` registration 已依使用者確認移除；遷移備份仍保留在 WSL 專案外作為 rollback，未取得另一次明確確認前不得刪除。
+
+## 建置系統
+
+- 正式建置系統採用 CMake，不另外維護手寫 Makefile。
+- 採用 out-of-source build，所有建置產物放在 `build/`，不得混入原始碼目錄或提交 Git。
+- CMake targets 至少包含動態共用函式庫 `game_common`、`server`、`client` 與自動測試。
+- 支援 Debug／Release 組態；測試統一透過 CTest 執行。
+- 預定的基本操作為：
+
+  ```sh
+  cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+  cmake --build build
+  ctest --test-dir build --output-on-failure
+  ```
 
 ## 連線模型
 
@@ -55,7 +69,7 @@
 - [ ] Client 可向 server 請求 system information
 - [ ] 設計並實作異常情況的強健性機制
 - [ ] 至少三組「未實作／已實作強健性機制」的執行差異範例
-- [ ] 使用 Makefile 或 CMake 建置
+- [ ] 使用 CMake 建置，並可透過 CTest 執行自動測試
 - [ ] 報告包含系統設計、關鍵原始碼、執行截圖與完整原始碼
 - [ ] 製作約 2 分鐘的操作展示影片
 
