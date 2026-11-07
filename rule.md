@@ -87,3 +87,5 @@
 29. Protocol header 必須逐欄位編碼與解碼，不得直接傳送 C `struct` 的記憶體內容。接收端在配置或讀取 payload 前，必須驗證 magic、version、reserved 與 payload length 上限，並以完整讀寫函式處理 partial read／write 及 `EINTR`。
 30. 第二台主機的 Windows／WSL 版本、message types、payload 格式與長度上限、連續無效請求的防濫用上限及額外功能仍在需求訪談中；未確認的項目不得自行視為已定案。
 31. Client 連線成功後的主選單固定包含：開始新遊戲、查看 server system information、查看本次 connection 戰績、離開；每局結束後回到主選單。戰績選項只讀取規則 16 已定義的 child process 記憶體資料，不得擴張為帳號、持久化資料或跨 connection 排行榜。
+32. Server system information 固定包含 Linux／kernel 版本、CPU 架構與邏輯核心數、系統運行時間、總記憶體與可用記憶體。必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接取得，不得執行 shell command。
+33. System information response 不得包含使用者名稱、私人路徑、IP address、環境變數或其他非必要機器識別資訊；測試證據、封包與截圖也必須遵守相同限制。
