@@ -78,7 +78,8 @@
 20. Loopback 封包證據使用 `tcpdump`；跨主機證據使用 Wireshark 擷取實體網路介面。若需調整 firewall，只允許測試所需的 TCP 9734，並避免不必要的對外網路暴露。
 21. 跨主機測試固定使用同一個私人 Wi-Fi／LAN，例如讓學校電腦連接使用者提供的個人熱點；不使用學校 Wi-Fi，也不以 public Internet、router port forwarding 或放寬 firewall 作為測試方案。
 22. Loopback 測試及其證據必須可獨立完成老師要求；跨主機測試屬額外驗證，不得成為專案完成的單一失敗點。
-23. 正式基準開發環境為本機 WSL2：distribution 名稱 `Ubuntu-22.04`，實際系統 Ubuntu 24.04.5 LTS、x86_64，專案路徑 `/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`。建置、執行、測試與證據指令必須先在此環境驗證。
+23. 正式基準開發環境為本機 WSL2：預設 distribution 名稱 `Ubuntu-24.04`，實際系統 Ubuntu 24.04.5 LTS、x86_64，專案路徑 `/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`。建置、執行、測試與證據指令必須先在此環境驗證。
 24. 本機 WSL 目前使用 NAT；loopback 開發先沿用 NAT，跨主機測試前再採用 mirrored networking 或等效且最小開放範圍的安全轉送方式。不得讓 WSL 網路設定阻擋 loopback 必交證據。
-25. 已驗證 GCC、Make、CMake、Git、GDB、`ldd`、`nc` 與 tcpdump 可用；`valgrind`、`socat` 尚未安裝且為選配，不得視為開始實作的阻擋條件。
-26. 第二台主機的 Windows／WSL 版本、連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。
+25. 已驗證 GCC、Make、CMake、Git、GDB、`ldd`、`nc`、tcpdump、valgrind 與 socat 可用。
+26. 舊的 `Ubuntu-22.04` registration 與遷移備份必須保留作為 rollback；只有在 `Ubuntu-24.04` 完成後續實作與測試，且使用者再次明確同意後，才可移除舊環境或備份。
+27. 第二台主機的 Windows／WSL 版本、連續無效請求的防濫用上限、額外功能與完整通訊協定仍在需求訪談中；未確認的項目不得自行視為已定案。

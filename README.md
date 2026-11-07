@@ -7,12 +7,12 @@
 ## 基準開發環境
 
 - Windows Subsystem for Linux 2（WSL 2.6.3）
-- WSL distribution 名稱：`Ubuntu-22.04`；實際系統：Ubuntu 24.04.5 LTS、x86_64
+- 預設 WSL distribution 名稱：`Ubuntu-24.04`；實際系統：Ubuntu 24.04.5 LTS、x86_64
 - Linux kernel：`6.6.87.2-microsoft-standard-WSL2`
 - 專案路徑：`/mnt/d/Data/Project/Network-And--SystemProgramming-midterm`
-- 已驗證工具：GCC 13.3、GNU Make 4.3、CMake 3.28.3、Git 2.43、GDB、`ldd`、`nc`、tcpdump 4.99.4
+- 已驗證工具：GCC 13.3、GNU Make 4.3、CMake 3.28.3、Git 2.43、GDB、`ldd`、`nc`、tcpdump 4.99.4、valgrind 3.22、socat 1.8
 - 目前 WSL 網路模式為 NAT；本機開發與 loopback 測試先沿用 NAT，跨主機測試前再設定 mirrored networking 或等效的安全轉送方式。
-- `valgrind` 與 `socat` 尚未安裝，屬後續測試用選配工具，不阻擋專案開發。
+- 舊的 `Ubuntu-22.04` registration 與遷移備份暫時保留作為 rollback；未取得使用者明確確認前不得移除。
 
 ## 連線模型
 
