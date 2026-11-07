@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 
 #define PROTOCOL_HEADER_SIZE 12U
 #define PROTOCOL_MAX_PAYLOAD_SIZE 4096U
@@ -31,7 +32,10 @@ typedef enum {
     PROTOCOL_STATUS_UNSUPPORTED_VERSION,
     PROTOCOL_STATUS_INVALID_RESERVED,
     PROTOCOL_STATUS_PAYLOAD_TOO_LARGE,
-    PROTOCOL_STATUS_UNKNOWN_TYPE
+    PROTOCOL_STATUS_UNKNOWN_TYPE,
+    PROTOCOL_STATUS_EOF,
+    PROTOCOL_STATUS_TIMEOUT,
+    PROTOCOL_STATUS_IO_ERROR
 } protocol_status_t;
 
 typedef struct {
@@ -39,6 +43,11 @@ typedef struct {
     protocol_message_type_t type;
     uint32_t payload_length;
 } protocol_header_t;
+
+typedef struct {
+    protocol_header_t header;
+    uint8_t payload[PROTOCOL_MAX_PAYLOAD_SIZE + 1U];
+} protocol_frame_t;
 
 protocol_status_t protocol_encode_header(
     uint8_t *buffer,
@@ -51,6 +60,20 @@ protocol_status_t protocol_decode_header(
     const uint8_t *buffer,
     size_t buffer_length,
     protocol_header_t *header
+);
+
+protocol_status_t protocol_send_frame(
+    int socket_fd,
+    protocol_message_type_t type,
+    const void *payload,
+    uint32_t payload_length,
+    const struct timespec *deadline
+);
+
+protocol_status_t protocol_receive_frame(
+    int socket_fd,
+    protocol_frame_t *frame,
+    const struct timespec *deadline
 );
 
 #endif

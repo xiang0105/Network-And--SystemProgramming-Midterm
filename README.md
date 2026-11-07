@@ -136,6 +136,6 @@ Server 必須使用 `uname()`、`sysinfo()`、`sysconf()` 等 Linux API 直接�
 
 已完成課程教材與老師範例程式盤點，並確定主題、遊戲模式、基本數字規則及回合猜測上限。
 
-前三個 CMake／CTest 程式切片已完成：`game_common` 動態共用函式庫目前提供四位遊戲代碼驗證、A/B 計分、12-byte protocol header codec，以及具 absolute deadline 的完整 socket read/write。三組測試皆已通過 Debug、Release、動態連結及 Valgrind 驗證。
+前四個 CMake／CTest 程式切片已完成：`game_common` 動態共用函式庫目前提供四位遊戲代碼驗證、A/B 計分、12-byte protocol header codec、具 absolute deadline 的完整 socket read/write，以及完整 application frame send/receive。四組測試皆已通過 Debug、Release、動態連結及 Valgrind 驗證。
 
-`server`、`client`、application frame 收送與遊戲 state machine 整合測試尚未實作，因此目前的 10 條 loopback smoke test 不作為正式 concurrency 證據，WSL 遷移備份也繼續保留。
+`server`、`client` 與遊戲 state machine 整合測試尚未實作，因此目前的 10 條 loopback smoke test 不作為正式 concurrency 證據，WSL 遷移備份也繼續保留。

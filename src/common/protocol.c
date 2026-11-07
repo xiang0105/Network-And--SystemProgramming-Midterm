@@ -1,5 +1,28 @@
 #include "protocol.h"
 
+#include "network_io.h"
+
+#include <string.h>
+
+static protocol_status_t protocol_status_from_network_io(
+    network_io_status_t status
+)
+{
+    switch (status) {
+    case NETWORK_IO_STATUS_OK:
+        return PROTOCOL_STATUS_OK;
+    case NETWORK_IO_STATUS_EOF:
+        return PROTOCOL_STATUS_EOF;
+    case NETWORK_IO_STATUS_TIMEOUT:
+        return PROTOCOL_STATUS_TIMEOUT;
+    case NETWORK_IO_STATUS_INVALID_ARGUMENT:
+        return PROTOCOL_STATUS_INVALID_ARGUMENT;
+    case NETWORK_IO_STATUS_SYSTEM_ERROR:
+    default:
+        return PROTOCOL_STATUS_IO_ERROR;
+    }
+}
+
 static int protocol_message_type_is_known(protocol_message_type_t type)
 {
     switch (type) {
@@ -102,5 +125,105 @@ protocol_status_t protocol_decode_header(
     header->type = (protocol_message_type_t)buffer[5];
     header->payload_length = payload_length;
 
+    return PROTOCOL_STATUS_OK;
+}
+
+protocol_status_t protocol_send_frame(
+    int socket_fd,
+    protocol_message_type_t type,
+    const void *payload,
+    uint32_t payload_length,
+    const struct timespec *deadline
+)
+{
+    uint8_t header_bytes[PROTOCOL_HEADER_SIZE];
+    protocol_status_t protocol_status;
+    network_io_status_t io_status;
+
+    if (payload == NULL && payload_length > 0U) {
+        return PROTOCOL_STATUS_INVALID_ARGUMENT;
+    }
+
+    protocol_status = protocol_encode_header(
+        header_bytes,
+        sizeof(header_bytes),
+        type,
+        payload_length
+    );
+    if (protocol_status != PROTOCOL_STATUS_OK) {
+        return protocol_status;
+    }
+
+    io_status = network_write_all(
+        socket_fd,
+        header_bytes,
+        sizeof(header_bytes),
+        deadline
+    );
+    if (io_status != NETWORK_IO_STATUS_OK) {
+        return protocol_status_from_network_io(io_status);
+    }
+
+    if (payload_length == 0U) {
+        return PROTOCOL_STATUS_OK;
+    }
+
+    io_status = network_write_all(
+        socket_fd,
+        payload,
+        payload_length,
+        deadline
+    );
+    return protocol_status_from_network_io(io_status);
+}
+
+protocol_status_t protocol_receive_frame(
+    int socket_fd,
+    protocol_frame_t *frame,
+    const struct timespec *deadline
+)
+{
+    uint8_t header_bytes[PROTOCOL_HEADER_SIZE];
+    protocol_status_t protocol_status;
+    network_io_status_t io_status;
+
+    if (frame == NULL) {
+        return PROTOCOL_STATUS_INVALID_ARGUMENT;
+    }
+
+    memset(frame, 0, sizeof(*frame));
+
+    io_status = network_read_exact(
+        socket_fd,
+        header_bytes,
+        sizeof(header_bytes),
+        deadline
+    );
+    if (io_status != NETWORK_IO_STATUS_OK) {
+        return protocol_status_from_network_io(io_status);
+    }
+
+    protocol_status = protocol_decode_header(
+        header_bytes,
+        sizeof(header_bytes),
+        &frame->header
+    );
+    if (protocol_status != PROTOCOL_STATUS_OK) {
+        return protocol_status;
+    }
+
+    if (frame->header.payload_length > 0U) {
+        io_status = network_read_exact(
+            socket_fd,
+            frame->payload,
+            frame->header.payload_length,
+            deadline
+        );
+        if (io_status != NETWORK_IO_STATUS_OK) {
+            return protocol_status_from_network_io(io_status);
+        }
+    }
+
+    frame->payload[frame->header.payload_length] = '\0';
     return PROTOCOL_STATUS_OK;
 }

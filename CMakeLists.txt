@@ -41,14 +41,21 @@ if(BUILD_TESTING)
         tests/test_network_io.c
     )
 
+    add_executable(frame_tests
+        tests/test_frame.c
+    )
+
     target_link_libraries(game_common_tests PRIVATE game_common)
     target_link_libraries(protocol_tests PRIVATE game_common)
     target_link_libraries(network_io_tests PRIVATE game_common)
+    target_link_libraries(frame_tests PRIVATE game_common)
     target_compile_options(game_common_tests PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(protocol_tests PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(network_io_tests PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(frame_tests PRIVATE -Wall -Wextra -Wpedantic)
 
     add_test(NAME game_common_tests COMMAND game_common_tests)
     add_test(NAME protocol_tests COMMAND protocol_tests)
     add_test(NAME network_io_tests COMMAND network_io_tests)
+    add_test(NAME frame_tests COMMAND frame_tests)
 endif()
