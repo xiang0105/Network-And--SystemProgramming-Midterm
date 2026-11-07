@@ -1,6 +1,8 @@
-# Network and System Programming Midterm
+# 幾A幾B Client-Server Game
 
-期中專題：以 C 實作 client-server 應用程式。主題與功能將在需求訪談後確定。
+期中專題：以 C 實作「幾A幾B」client-server 小遊戲。
+
+目前確定採用獨立單人模式：每個 client 各自連線並挑戰由 server 產生的答案；server 對每個 connection 使用獨立的 child process 保存該局狀態並處理猜測。
 
 ## 作業要求檢核
 
@@ -18,4 +20,4 @@
 
 ## 目前狀態
 
-已完成課程教材與老師範例程式盤點，尚未決定應用主題。
+已完成課程教材與老師範例程式盤點，並確定主題及遊戲模式。其餘玩法、協定與功能仍在需求訪談中。
