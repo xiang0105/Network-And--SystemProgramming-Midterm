@@ -1,6 +1,7 @@
 #include "server_session.h"
 
 #include "game.h"
+#include "log.h"
 #include "protocol.h"
 
 #include <stdbool.h>
@@ -92,6 +93,7 @@ static int session_format_system_info(char *buffer, size_t buffer_size)
 int server_session_run(
     int socket_fd,
     unsigned int idle_timeout_seconds,
+    const char *peer_label,
     server_answer_generator_t answer_generator,
     void *answer_generator_context
 )
@@ -105,11 +107,14 @@ int server_session_run(
     char answer[5] = {0};
     unsigned int attempts = 0U;
     unsigned int consecutive_errors = 0U;
+    const char *peer = peer_label != NULL ? peer_label : "[unknown]:0";
 
     if (socket_fd < 0 || idle_timeout_seconds == 0U
         || answer_generator == NULL) {
         return -1;
     }
+
+    LOG_INFO("session_started peer=%s", peer);
 
     if (session_deadline_after_seconds(
             &deadline,
@@ -137,6 +142,7 @@ int server_session_run(
 
         status = protocol_receive_frame(socket_fd, &request, &deadline);
         if (status == PROTOCOL_STATUS_EOF) {
+            LOG_INFO("session_ended peer=%s reason=peer_closed", peer);
             return 0;
         }
         if (status == PROTOCOL_STATUS_TIMEOUT) {
@@ -151,14 +157,21 @@ int server_session_run(
                     &deadline
                 );
             }
+            LOG_INFO("session_ended peer=%s reason=timeout", peer);
             return 0;
         }
         if (status != PROTOCOL_STATUS_OK) {
+            LOG_ERROR(
+                "session_ended peer=%s reason=protocol_error status=%d",
+                peer,
+                (int)status
+            );
             return 0;
         }
 
         if (request.header.type == PROTOCOL_MSG_QUIT
             && request.header.payload_length == 0U) {
+            LOG_INFO("peer=%s action=QUIT", peer);
             return 0;
         }
 
@@ -185,6 +198,7 @@ int server_session_run(
                 ) != PROTOCOL_STATUS_OK) {
                 return -1;
             }
+            LOG_INFO("peer=%s action=START_GAME", peer);
             continue;
         }
 
@@ -197,6 +211,11 @@ int server_session_run(
 
             if (!game_code_is_valid((const char *)request.payload, 4U)) {
                 ++consecutive_errors;
+                LOG_INFO(
+                    "peer=%s action=GUESS result=invalid consecutive_errors=%u",
+                    peer,
+                    consecutive_errors
+                );
                 if (session_deadline_after_seconds(
                         &deadline,
                         idle_timeout_seconds
@@ -210,6 +229,10 @@ int server_session_run(
                     return -1;
                 }
                 if (consecutive_errors >= 5U) {
+                    LOG_INFO(
+                        "session_ended peer=%s reason=too_many_errors",
+                        peer
+                    );
                     return 0;
                 }
                 continue;
@@ -255,6 +278,12 @@ int server_session_run(
                     ) != PROTOCOL_STATUS_OK) {
                     return -1;
                 }
+                LOG_INFO(
+                    "peer=%s action=GUESS guess=%.4s a=4 b=0 attempt=%u outcome=win",
+                    peer,
+                    (const char *)request.payload,
+                    attempts
+                );
                 continue;
             }
 
@@ -284,6 +313,13 @@ int server_session_run(
                     ) != PROTOCOL_STATUS_OK) {
                     return -1;
                 }
+                LOG_INFO(
+                    "peer=%s action=GUESS guess=%.4s a=%u b=%u attempt=15 outcome=loss",
+                    peer,
+                    (const char *)request.payload,
+                    score.exact_matches,
+                    score.misplaced_matches
+                );
                 continue;
             }
 
@@ -309,6 +345,14 @@ int server_session_run(
                 ) != PROTOCOL_STATUS_OK) {
                 return -1;
             }
+            LOG_INFO(
+                "peer=%s action=GUESS guess=%.4s a=%u b=%u attempt=%u outcome=continue",
+                peer,
+                (const char *)request.payload,
+                score.exact_matches,
+                score.misplaced_matches,
+                attempts
+            );
             continue;
         }
 
@@ -334,6 +378,7 @@ int server_session_run(
                 ) != PROTOCOL_STATUS_OK) {
                 return -1;
             }
+            LOG_INFO("peer=%s action=GET_SYSTEM_INFO", peer);
             continue;
         }
 
@@ -368,10 +413,24 @@ int server_session_run(
                 ) != PROTOCOL_STATUS_OK) {
                 return -1;
             }
+            LOG_INFO(
+                "peer=%s action=GET_STATS completed=%u wins=%u losses=%u best_attempts=%u",
+                peer,
+                completed_games,
+                wins,
+                losses,
+                best_attempts
+            );
             continue;
         }
 
         ++consecutive_errors;
+        LOG_INFO(
+            "peer=%s action=UNSUPPORTED type=0x%02x consecutive_errors=%u",
+            peer,
+            (unsigned int)request.header.type,
+            consecutive_errors
+        );
         if (session_deadline_after_seconds(
                 &deadline,
                 idle_timeout_seconds
@@ -385,6 +444,10 @@ int server_session_run(
             return -1;
         }
         if (consecutive_errors >= 5U) {
+            LOG_INFO(
+                "session_ended peer=%s reason=too_many_errors",
+                peer
+            );
             return 0;
         }
     }

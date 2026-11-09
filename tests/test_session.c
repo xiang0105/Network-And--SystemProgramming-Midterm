@@ -49,7 +49,9 @@ int main(void)
         int result;
 
         close(sockets[0]);
-        result = server_session_run(sockets[1], 1U, fixed_answer, NULL);
+        result = server_session_run(
+            sockets[1], 1U, "[test-client]:1", fixed_answer, NULL
+        );
         close(sockets[1]);
         _exit(result == 0 ? 0 : 2);
     }
@@ -301,7 +303,13 @@ int main(void)
             int result;
 
             close(abuse_sockets[0]);
-            result = server_session_run(abuse_sockets[1], 1U, fixed_answer, NULL);
+            result = server_session_run(
+                abuse_sockets[1],
+                1U,
+                "[test-client]:2",
+                fixed_answer,
+                NULL
+            );
             close(abuse_sockets[1]);
             _exit(result == 0 ? 0 : 2);
         }
@@ -376,7 +384,13 @@ int main(void)
             int result;
 
             close(timeout_sockets[0]);
-            result = server_session_run(timeout_sockets[1], 1U, fixed_answer, NULL);
+            result = server_session_run(
+                timeout_sockets[1],
+                1U,
+                "[test-client]:3",
+                fixed_answer,
+                NULL
+            );
             close(timeout_sockets[1]);
             _exit(result == 0 ? 0 : 2);
         }

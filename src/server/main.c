@@ -105,6 +105,40 @@ static unsigned int parse_timeout(const char *text)
     return (unsigned int)value;
 }
 
+static int format_peer_label(
+    const struct sockaddr *address,
+    socklen_t address_length,
+    char *label,
+    size_t label_size
+)
+{
+    char host[128];
+    char service[32];
+    int written;
+
+    if (address == NULL || label == NULL || label_size == 0U) {
+        return -1;
+    }
+
+    if (getnameinfo(
+            address,
+            address_length,
+            host,
+            sizeof(host),
+            service,
+            sizeof(service),
+            NI_NUMERICHOST | NI_NUMERICSERV
+        ) != 0) {
+        return -1;
+    }
+
+    written = snprintf(label, label_size, "[%s]:%s", host, service);
+    if (written < 0 || (size_t)written >= label_size) {
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     const char *host = DEFAULT_HOST;
@@ -158,6 +192,9 @@ int main(int argc, char **argv)
     LOG_INFO("listening on %s:%s with timeout=%u", host, port, timeout);
 
     for (;;) {
+        struct sockaddr_storage peer_address;
+        socklen_t peer_address_length = sizeof(peer_address);
+        char peer_label[192] = "[unknown]:0";
         int client_fd;
         pid_t child;
         int admitted;
@@ -166,7 +203,11 @@ int main(int argc, char **argv)
             reap_children(active_pids, &active_count);
         }
 
-        client_fd = accept(listener, NULL, NULL);
+        client_fd = accept(
+            listener,
+            (struct sockaddr *)&peer_address,
+            &peer_address_length
+        );
         if (client_fd < 0) {
             if (errno == EINTR) {
                 continue;
@@ -175,12 +216,25 @@ int main(int argc, char **argv)
             continue;
         }
 
-        LOG_DEBUG("accepted connection; active_sessions=%zu", active_count);
+        if (format_peer_label(
+                (const struct sockaddr *)&peer_address,
+                peer_address_length,
+                peer_label,
+                sizeof(peer_label)
+            ) != 0) {
+            LOG_ERROR("could not format connected client address");
+        }
+
+        LOG_DEBUG(
+            "accepted connection peer=%s active_sessions=%zu",
+            peer_label,
+            active_count
+        );
 
         admitted = active_count < MAX_ACTIVE_CLIENTS;
         child = fork();
         if (child < 0) {
-            LOG_ERROR("fork failed: %s", strerror(errno));
+            LOG_ERROR("fork failed peer=%s: %s", peer_label, strerror(errno));
             close(client_fd);
             continue;
         }
@@ -189,7 +243,13 @@ int main(int argc, char **argv)
             int result = 0;
             close(listener);
             if (admitted) {
-                result = server_session_run(client_fd, timeout, generate_answer, NULL);
+                result = server_session_run(
+                    client_fd,
+                    timeout,
+                    peer_label,
+                    generate_answer,
+                    NULL
+                );
             } else {
                 struct timespec deadline;
                 if (clock_gettime(CLOCK_MONOTONIC, &deadline) == 0) {
@@ -198,6 +258,11 @@ int main(int argc, char **argv)
                         "server busy", 11U, &deadline);
                 }
             }
+            LOG_INFO(
+                "client_disconnected peer=%s result=%s",
+                peer_label,
+                result == 0 ? "normal" : "error"
+            );
             close(client_fd);
             _exit(result == 0 ? 0 : 1);
         }
@@ -205,7 +270,18 @@ int main(int argc, char **argv)
         close(client_fd);
         if (admitted) {
             active_pids[active_count++] = child;
-            LOG_DEBUG("forked session child=%ld active_sessions=%zu", (long)child, active_count);
+            LOG_INFO(
+                "client_connected peer=%s child=%ld active_sessions=%zu",
+                peer_label,
+                (long)child,
+                active_count
+            );
+        } else {
+            LOG_INFO(
+                "client_rejected peer=%s child=%ld reason=server_busy",
+                peer_label,
+                (long)child
+            );
         }
     }
 }

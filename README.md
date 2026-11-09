@@ -62,6 +62,23 @@
 - 連線成功後顯示主選單：開始新遊戲、查看 server system information、查看本次 connection 戰績、離開。每局結束後回到主選單。
 - 「本次 connection 戰績」只是目前 client 視窗的臨時計數，包含完成局數、勝利、失敗及最佳猜測次數；不建立帳號、不與其他玩家比較，關閉 connection 後清空。
 
+## Server 活動紀錄
+
+- 一般執行 `./server` 時，預設 `info` 層級會顯示 client 來源 IP、來源 port、負責的 child PID、目前連線數、client 操作與離線結果。
+- 遊戲操作會記錄 `START_GAME`、每次合法猜測的四位數與 A/B 結果、勝敗及嘗試次數；不會提前記錄或公開 server 產生的正確答案。
+- 查詢操作會記錄 `GET_SYSTEM_INFO`、`GET_STATS` 與 `QUIT`，但不會把完整 system information response 寫入 log。
+- `--log-level debug` 會額外顯示較低階的 `accept()` 資訊；`--log-level error` 則只保留錯誤。
+- 每筆 log 會先在記憶體中組合完成，再以單次寫入輸出，避免 parent 與多個 child 同時記錄時互相黏行。
+- 來源 IP 與 port 僅供操作紀錄與執行證據使用，不作為玩家身分、配對或跨 connection 狀態的依據。
+
+  ```text
+  [INFO pid=801] client_connected peer=[127.0.0.1]:60394 child=809 active_sessions=1
+  [INFO pid=809] peer=[127.0.0.1]:60394 action=GET_SYSTEM_INFO
+  [INFO pid=809] peer=[127.0.0.1]:60394 action=GET_STATS completed=0 wins=0 losses=0 best_attempts=0
+  [INFO pid=809] peer=[127.0.0.1]:60394 action=QUIT
+  [INFO pid=809] client_disconnected peer=[127.0.0.1]:60394 result=normal
+  ```
+
 ## 通訊協定 Header
 
 每個 application message 都由固定 12-byte header 與其後的 payload 組成：

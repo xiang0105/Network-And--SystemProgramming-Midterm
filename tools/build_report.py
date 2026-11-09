@@ -380,9 +380,9 @@ def build_report():
         document,
         ["階段", "Parent", "Child", "Client"],
         [
-            ("建立", "accept 後 fork", "關閉 listener", "connect"),
+            ("建立", "記錄 IP port 後 fork", "關閉 listener", "connect"),
             ("歡迎", "記錄 child PID", "送 WELCOME", "顯示主選單"),
-            ("操作", "繼續 accept", "處理 frame 與狀態", "遊戲或查詢"),
+            ("操作", "繼續 accept", "處理 frame 狀態與活動 log", "遊戲或查詢"),
             ("結束", "SIGCHLD 後 waitpid", "關閉 connected socket", "QUIT 或 close"),
         ],
         widths=[0.85, 1.75, 2.05, 1.75],
@@ -439,16 +439,21 @@ def build_report():
 
     add_heading(document, "五 關鍵原始碼", 1)
     add_heading(document, "Fork 每條 Connection", 2)
-    add_body(document, "Parent 接受一條 connection 後決定是否進入正常 session，接著不論是否已達上限都建立 child。正常 child 執行 session；超額 child 只送出 server busy 後結束。")
+    add_body(document, "Parent 接受一條 connection 後先以數字格式保存來源 IP 與 port，再決定是否進入正常 session，接著不論是否已達上限都建立 child。正常 child 執行 session；超額 child 只送出 server busy 後結束。")
     add_code(document, """
-client_fd = accept(listener, NULL, NULL);
+client_fd = accept(listener,
+                   (struct sockaddr *)&peer_address,
+                   &peer_address_length);
+format_peer_label((const struct sockaddr *)&peer_address,
+                  peer_address_length, peer_label, sizeof(peer_label));
 admitted = active_count < MAX_ACTIVE_CLIENTS;
 child = fork();
 
 if (child == 0) {
     close(listener);
     if (admitted) {
-        result = server_session_run(client_fd, timeout, generate_answer, NULL);
+        result = server_session_run(client_fd, timeout, peer_label,
+                                    generate_answer, NULL);
     } else {
         protocol_send_frame(client_fd, PROTOCOL_MSG_ERROR,
                             "server busy", 11U, &deadline);
@@ -477,7 +482,7 @@ bool game_code_is_valid(const char *code, size_t length)
 """)
 
     add_heading(document, "兩層 Log 控制", 2)
-    add_body(document, "CMake option ENABLE_DEBUG_LOG 決定 LOG_DEBUG 是否進入 binary；編譯啟用後，server 仍可透過 --log-level 在執行期選擇 error、info 或 debug。")
+    add_body(document, "CMake option ENABLE_DEBUG_LOG 決定 LOG_DEBUG 是否進入 binary；編譯啟用後，server 仍可透過 --log-level 在執行期選擇 error、info 或 debug。預設 info 會記錄 client IP、來源 port、child PID、遊戲與查詢操作及離線結果；答案不會提前寫入 log。每筆紀錄先完整組合再單次寫出，避免 parent 與多個 child 同時輸出時互相黏行。")
     add_code(document, """
 #ifdef ENABLE_DEBUG_LOG
 #define LOG_DEBUG(...) log_message(LOG_LEVEL_DEBUG, __VA_ARGS__)
@@ -486,6 +491,13 @@ bool game_code_is_valid(const char *code, size_t length)
 #endif
 
 ./server --log-level debug
+""")
+    add_code(document, """
+[INFO pid=801] client_connected peer=[127.0.0.1]:60394 child=809 active_sessions=1
+[INFO pid=809] peer=[127.0.0.1]:60394 action=GET_SYSTEM_INFO
+[INFO pid=809] peer=[127.0.0.1]:60394 action=GET_STATS completed=0 wins=0 losses=0 best_attempts=0
+[INFO pid=809] peer=[127.0.0.1]:60394 action=QUIT
+[INFO pid=809] client_disconnected peer=[127.0.0.1]:60394 result=normal
 """)
 
     add_heading(document, "System Information", 2)
