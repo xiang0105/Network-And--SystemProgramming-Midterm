@@ -34,3 +34,25 @@ Thumbs.db
 # Internal document render/QA output
 report/qa/
 
+# Local CodeGraph index cache
+.codegraph/
+
+# Keep only approved project documentation and evidence in Git
+*.md
+!README.md
+!docs/testing/*.md
+!evidence/screenshots/README.md
+!evidence/packet-capture/README.md
+
+*.txt
+!CMakeLists.txt
+
+*.doc
+*.docx
+!report/Network_Programming_Midterm_Report.docx
+*.pdf
+*.rtf
+*.odt
+*.ppt
+*.pptx
+
